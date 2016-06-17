@@ -1,0 +1,5 @@
+vanity_name: "REST SmartThings Home"
+short_name: resthome
+# influx_username: influx
+# influx_password: rulez
+# grafana_admin_password: bar

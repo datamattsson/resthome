@@ -1,0 +1,22 @@
+---
+
+- hosts: localhost
+  tasks:
+
+  - name: Delete InfluxDB Container
+    docker_container:
+      name: influxdb
+      state: absent
+  
+  - name: Delete Grafana Container
+    docker_container:
+      name: grafana
+      state: absent
+  
+  - name: Delete ReSTHome Container
+    docker_container:
+      name: resthome
+      state: absent
+
+  - file: path=/var/lib/grafana state=absent
+  - file: path=/var/lib/influxdb state=absent

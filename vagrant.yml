@@ -1,0 +1,45 @@
+---
+
+- hosts: all
+  vars_files:
+    - vars_local.yml
+
+# vars:
+#      vanity_name: "REST SmartThings Home"
+#      short_name: resthome
+
+  tasks:
+  - name: Make sure smartthings.json exists
+    stat: path=smartthings.json
+    register: config
+  - name: Fail if not
+    fail: msg="smartthings.json does not exist in cwd"
+    when: config.stat.exists is not defined
+
+  - name: Allow HTTPS apt transport
+    apt: name=apt-transport-https state=present update_cache=yes
+    become: yes
+  - name: Install ca-certs
+    apt: name=ca-certificates state=present
+    become: yes
+  - name: Add key server
+    apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+    become: yes
+  - name: Add Docker repo
+    apt_repository: repo="deb https://apt.dockerproject.org/repo ubuntu-trusty main" state=present
+    become: yes
+  - name: Install Docker Engine 
+    apt: name=docker-engine state=present
+    become: yes
+  - name: Enable Docker Engine
+    service: name=docker state=started
+    become: yes
+  - name: Install pip
+    apt: name=python-pip state=present
+    become: yes
+  - name: Ensure vagrant is in docker group
+    user: name=vagrant groups=docker append=yes
+    become: yes
+  - name: Symlink smartthings.json
+    file: src=/vagrant/smartthings.json dest=/home/vagrant/smartthings.json state=link
+  - include: resthome.yml

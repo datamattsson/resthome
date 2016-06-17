@@ -1,0 +1,128 @@
+---
+  - name: Make sure smartthings.json exists
+    stat: path=smartthings.json
+    register: config
+  - name: Fail if not
+    fail: msg="smartthings.json does not exist in cwd"
+    when: config.stat.exists is not defined
+
+  - name: Ensure docker-py is installed
+    command: pip install docker-py
+    become: yes
+
+  - name: Ensure influxdb py module is too
+    command: pip install influxdb
+    become: yes
+
+#  - name: InfluxDB docker volume inspect
+#    command: docker volume inspect resthomedb
+#    register: resthomedb_exists
+#    failed_when: false
+
+#  - name: InfluxDB docker volume create
+#    command: docker volume create --name resthomedb
+#    when: resthomedb_exists|failed
+  
+  - name: Create InfluxDB Container
+    docker_container:
+      name: influxdb
+      image: influxdb:0.13
+      volumes:
+        - /var/lib/influxdb
+      ports:
+        - 8083:8083
+        - 8086:8086
+      env:
+          INFLUXDB_HTTP_AUTH_ENABLED: true
+  
+  - name: Create InfluxDB user
+    uri:
+      url: http://localhost:8086/query
+      method: POST
+      body: "q=CREATE%20USER%20{{ influx_username | default('root') }}%20WITH%20PASSWORD%20%27{{ influx_password | default('root') }}%27%20WITH%20ALL%20PRIVILEGES"
+      status_code: 200
+
+  - name: "Create {{ short_name }} DB"
+    influxdb_database:
+      hostname: localhost
+      database_name: "{{ short_name}}db"
+      state: present
+      username: "{{ influx_username | default('root') }}"
+      password: "{{ influx_password | default('root') }}"
+
+  - name: Create Grafana Container
+    docker_container:
+      name: grafana
+      image: grafana/grafana:3.0.4
+      volumes:
+        - /var/lib/grafana
+      ports:
+        - 3000:3000
+      links:
+        - "influxdb:db"
+      env:
+          GF_SECURITY_ADMIN_PASSWORD: "{{ grafana_admin_password | default('admin') }}"
+
+  - name: Wait for Grafana to come up
+    uri:
+      url: http://localhost:3000/
+      status_code: 200
+    register: result
+    until: result.status == 200
+    retries: 30
+    delay: 1
+
+  - name: Hookup Grafana to InfluxDB
+    uri:
+      url: http://localhost:3000/api/datasources
+      method: POST
+      user: admin
+      password: "{{ grafana_admin_password | default('admin') }}"
+      body_format: json
+      body:
+          name: "{{ vanity_name }}"
+          type: influxdb
+          url: http://db:8086
+          access: proxy
+          database: "{{ short_name }}db"
+          user: "{{ influx_username | default('root') }}"
+          password: "{{ influx_password | default('root') }}"
+          isDefault: true
+          basicAuth: false
+
+      force_basic_auth: yes
+      status_code: 200
+  
+  - name: "Create the {{ vanity_name }} dashboard"
+    uri:
+      url: http://localhost:3000/api/dashboards/db
+      method: POST
+      user: admin
+      password: "{{ grafana_admin_password | default('admin') }}"
+      body_format: json
+      body: "{{ lookup('file','resthome-dashboard.json') }}"
+      force_basic_auth: yes
+      status_code: 200
+  
+  - name: "Star the {{ vanity_name }} dashboard"
+    uri:
+      url: http://localhost:3000/api/user/stars/dashboard/1
+      method: POST
+      user: admin
+      password: "{{ grafana_admin_password | default('admin') }}"
+      force_basic_auth: yes
+      status_code: 200
+
+  - name: "Create {{ vanity_name }} app container"
+    docker_container:
+      name: resthome
+      image: drajen/resthome:1.0
+      volumes:
+        - smartthings.json:/usr/src/app/smartthings.json
+      links:
+        - "influxdb:db"
+      env:
+          INFLUX_NODENAME: "db"
+          INFLUX_DB: "{{ short_name }}db"
+          INFLUX_USERNAME: "{{ influx_username | default('root') }}"
+          INFLUX_PASSWORD: "{{ influx_password | default('root') }}"

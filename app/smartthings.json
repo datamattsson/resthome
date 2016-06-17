@@ -1,0 +1,10 @@
+{
+  "access_token": "", 
+  "api": "https://graph.api.smartthings.com/api/smartapps/endpoints//", 
+  "api_location": "graph.api.smartthings.com", 
+  "client_id": "", 
+  "client_secret": "", 
+  "expires_in": 0, 
+  "scope": "app", 
+  "token_type": "bearer"
+}

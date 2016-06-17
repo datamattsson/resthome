@@ -1,3 +1,10 @@
+# Local ignores
+*.retry
+tmp/
+smartthings.json
+app/smartthings.py
+.vagrant/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
