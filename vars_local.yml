@@ -1,5 +1,22 @@
+# Do not change these
 vanity_name: "REST SmartThings Home"
 short_name: resthome
-# influx_username: influx
-# influx_password: rulez
-# grafana_admin_password: bar
+
+# Local customization
+
+# InfluxDB desired username and password
+# influx_username: root
+# influx_password: root
+
+# Grafana admin user password
+# grafana_admin_password: admin
+
+# How often to poll your data
+# poll_interval: 900
+
+# Exclude sensors by type (comma separated list)
+# device_exclusion: "motion,humidity"
+# Empty by default
+
+# Retry interval if SmartThings isn't reachable
+# connect_retry: 60

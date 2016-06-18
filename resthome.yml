@@ -4,7 +4,7 @@
     register: config
   - name: Fail if not
     fail: msg="smartthings.json does not exist in cwd"
-    when: config.stat.exists is not defined
+    when: config.stat.exists == False
 
   - name: Ensure docker-py is installed
     command: pip install docker-py
@@ -116,7 +116,7 @@
   - name: "Create {{ vanity_name }} app container"
     docker_container:
       name: resthome
-      image: drajen/resthome:1.0
+      image: drajen/resthome:1.1
       volumes:
         - smartthings.json:/usr/src/app/smartthings.json
       links:
@@ -126,3 +126,6 @@
           INFLUX_DB: "{{ short_name }}db"
           INFLUX_USERNAME: "{{ influx_username | default('root') }}"
           INFLUX_PASSWORD: "{{ influx_password | default('root') }}"
+          IOTDB_POLL_INTERVAL: "{{ poll_interval | default('900') }}"
+          IOTDB_DEVICE_EXCLUSION: "{{ device_exclusion | default('') }}"
+          IOTDB_RETRY_INTERVAL: "{{ connect_retry | default('60') }}"
