@@ -74,12 +74,13 @@ You should now be able to browse http://localhost:3000
 
 ## Example dashboards
 What you'll see when browsing to http://localhost:3000 after you logged in and clicked the REST SmartThings Home dashboard you should see something like this:
-
 ![Home dashboard](https://raw.githubusercontent.com/drajen/resthome/master/screenshots/main.png)
 
 Grafana let you all sorts of cool things, this is an example of my door switches and the prescence of my car:
-
 ![Contacts dashboard](https://raw.githubusercontent.com/drajen/resthome/master/screenshots/contacts.png)
+
+This is on old version of Grafana that has been running for a while:
+![Legacy dashboard](https://raw.githubusercontent.com/drajen/resthome/master/screenshots/legacy.png)
 
 Stay tuned for more cool examples...
 
