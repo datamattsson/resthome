@@ -27,7 +27,10 @@ Since everyhing is being assembled and run on the host you choose to install it 
 
 From a dataset with about six months worth of sensor data from ten SmartThings collected every 15 minutes is roughly 4.5GB. Excellent compression ratios of InfluxDB data have been witnessed in production environments and it's highly recommended using ZFS lz4 compression on /var on the deployment host. Although, this is not covered in this guide at this time.
 
-## Local customization
+## Installation
+Please make sure you have followed the steps above to become a SmartThings developer following [these steps](https://github.com/dpjanes/iotdb-smartthings/blob/master/README.md) and that your `smarthings.json` is in your ~.
+
+### Local customization
 The file `vars_local.yml` is sourced by Ansible and contains a few variables that might need some tweaking if you're deploying resthome on the public Internet. The setup procedures assumes factory defaults.
 
 ### Install on a Ubuntu Linux host
@@ -81,7 +84,7 @@ Grafana let you all sorts of cool things, this is an example of my door switches
 Stay tuned for more cool examples...
 
 ## TODO
-+ Use docker volumes instead of local binds (pending this [commit](https://github.com/ansible/ansible-modules-core/commit/e2d8d9d09a0a62d7aaa2ac915ef56d5a10fc673e)
++ Use docker volumes instead of local binds (pending this [commit](https://github.com/ansible/ansible-modules-core/commit/e2d8d9d09a0a62d7aaa2ac915ef56d5a10fc673e))
 + Add DigitalOcean Droplet install procedure
 + More documentation
 + Demo environment
